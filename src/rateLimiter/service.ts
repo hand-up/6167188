@@ -115,6 +115,7 @@ export const rateLimiterService = fp(
             const { isLimitExceeded, retryAfter } = bucket.take();
 
             if (isLimitExceeded) {
+                request.log.warn(`Client ${request.ip} exceeded rate limit`);
                 reply.status(429);
                 reply.header('Retry-After', retryAfter);
                 done(new RateLimitError(retryAfter));
