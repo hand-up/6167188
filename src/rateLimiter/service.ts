@@ -3,6 +3,7 @@ import { TimeUnitEnum } from './constants';
 import { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getSecondsELapsedTillNow } from '../utils/time';
 import { configType } from './config';
+import { RateLimitError } from './error';
 
 class Bucket {
     readonly #capacity: number;
@@ -116,11 +117,7 @@ export const rateLimiterService = fp(
             if (isLimitExceeded) {
                 reply.status(429);
                 reply.header('Retry-After', retryAfter);
-                done(
-                    new Error(
-                        `Rate limit exceeded. Try again in ${retryAfter} seconds`
-                    )
-                );
+                done(new RateLimitError(retryAfter));
             }
 
             done();
