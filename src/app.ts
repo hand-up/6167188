@@ -1,7 +1,7 @@
 import { join } from 'path';
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload';
 import { FastifyPluginAsync } from 'fastify';
-import { rateLimiterService } from './rateLimiter/service';
+import { rateLimiterService } from './plugins/rateLimiter';
 
 export type AppOptions = {} & Partial<AutoloadPluginOptions>;
 

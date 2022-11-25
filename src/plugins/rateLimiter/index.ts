@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin';
 import { TimeUnitEnum } from './constants';
 import { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { getSecondsELapsedTillNow } from '../utils/time';
+import { getSecondsELapsedTillNow } from '../../utils/time';
 import { configType, RateLimiterEnumConfig } from './config';
 import { RateLimitError } from './error';
 import { bootstrapRateLimiterCache } from './cache';
