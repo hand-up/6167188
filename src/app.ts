@@ -2,31 +2,19 @@ import { join } from 'path';
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload';
 import { FastifyPluginAsync } from 'fastify';
 import { rateLimiterService } from './rateLimiter/service';
-import fastifyEnv from '@fastify/env';
-import { config } from './rateLimiter/config';
-
-declare module 'fastify' {
-    interface FastifyInstance {
-        rateLimiterConfig?: {};
-    }
-}
 
 export type AppOptions = {} & Partial<AutoloadPluginOptions>;
 
 // Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {};
+// const options: AppOptions = {};
 
 const app: FastifyPluginAsync<AppOptions> = async (
     fastify,
     opts
 ): Promise<void> => {
     // Place here your custom code!
-    fastify.register(fastifyEnv, config);
-    await fastify.after();
 
-    fastify.register(rateLimiterService, {
-        config: fastify.rateLimiterConfig,
-    });
+    fastify.register(rateLimiterService);
     // Do not touch the following lines
 
     // This loads all plugins defined in plugins
@@ -46,4 +34,3 @@ const app: FastifyPluginAsync<AppOptions> = async (
 };
 
 export default app;
-export { app, options };

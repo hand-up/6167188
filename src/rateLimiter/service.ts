@@ -2,8 +2,9 @@ import fp from 'fastify-plugin';
 import { TimeUnitEnum } from './constants';
 import { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getSecondsELapsedTillNow } from '../utils/time';
-import { configType } from './config';
+import { configType, RateLimiterEnumConfig } from './config';
 import { RateLimitError } from './error';
+import { bootstrapRateLimiterCache } from './cache';
 
 class Bucket {
     readonly #capacity: number;
@@ -65,11 +66,11 @@ class Bucket {
 class RateLimiter {
     readonly #config: configType;
     #buckets: Record<string, any>;
-    readonly #blockList: any; // TODO: properly type the SET
+    readonly #blockList: Set<string>;
 
     constructor(config: configType) {
         this.#buckets = new Map();
-        this.#blockList = new Set(config.BLOCK_LIST.split(''));
+        this.#blockList = new Set(config.BLOCK_LIST.split(','));
         this.#config = config;
     }
 
@@ -92,36 +93,49 @@ class RateLimiter {
 }
 
 export const rateLimiterService = fp(
-    (
+    async (
         fastify: FastifyInstance,
         options: FastifyPluginOptions,
         next: (error?: FastifyError) => void
-    ): void => {
-        const rateLimiter = new RateLimiter(options.config);
+    ): Promise<void> => {
+        const rateLimiterRedis = await bootstrapRateLimiterCache();
+        const [BLOCK_LIST, BUCKET_CAPACITY, TIME_FRAME] = await Promise.all([
+            rateLimiterRedis.get(RateLimiterEnumConfig.BLOCK_LIST),
+            rateLimiterRedis.get(RateLimiterEnumConfig.BUCKET_CAPACITY),
+            rateLimiterRedis.get(RateLimiterEnumConfig.TIME_FRAME),
+        ]);
 
-        fastify.addHook('onRequest', (request, reply, done) => {
+        const rateLimiter = new RateLimiter({
+            BLOCK_LIST,
+            BUCKET_CAPACITY,
+            TIME_FRAME,
+        });
+
+        fastify.addHook('onRequest', async (request, reply) => {
             const rateLimiterClientIdentifier = request.ip;
+            const {
+                isClientUnderRateLimitRestrictions,
+                createOrUpdateClientBucket,
+            } = rateLimiter;
             if (
-                !rateLimiter.isClientUnderRateLimitRestrictions(
-                    rateLimiterClientIdentifier
-                )
+                isClientUnderRateLimitRestrictions(rateLimiterClientIdentifier)
             ) {
                 next();
             }
 
-            const bucket = rateLimiter.createOrUpdateClientBucket(
+            const bucket = createOrUpdateClientBucket(
                 rateLimiterClientIdentifier
             );
             const { isLimitExceeded, retryAfter } = bucket.take();
 
             if (isLimitExceeded) {
-                request.log.warn(`Client ${request.ip} exceeded rate limit`);
+                request.log.warn(
+                    `Client ${rateLimiterClientIdentifier} exceeded rate limit`
+                );
                 reply.status(429);
                 reply.header('Retry-After', retryAfter);
-                done(new RateLimitError(retryAfter));
+                reply.send(new RateLimitError(retryAfter));
             }
-
-            done();
         });
 
         next();
