@@ -1,8 +1,6 @@
 import fp from 'fastify-plugin';
 import { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { RateLimiterEnumConfig } from './config';
 import { RateLimitError } from './error';
-import { bootstrapRateLimiterCache } from './cache';
 import { RateLimiter } from './service';
 
 export const rateLimiterService = fp(
@@ -11,18 +9,7 @@ export const rateLimiterService = fp(
         options: FastifyPluginOptions,
         next: (error?: FastifyError) => void
     ): Promise<void> => {
-        const rateLimiterRedis = bootstrapRateLimiterCache();
-        const [BLOCK_LIST, BUCKET_CAPACITY, TIME_FRAME] = await Promise.all([
-            rateLimiterRedis.get(RateLimiterEnumConfig.BLOCK_LIST),
-            rateLimiterRedis.get(RateLimiterEnumConfig.BUCKET_CAPACITY),
-            rateLimiterRedis.get(RateLimiterEnumConfig.TIME_FRAME),
-        ]);
-
-        const rateLimiter = RateLimiter.getInstance({
-            BLOCK_LIST,
-            BUCKET_CAPACITY,
-            TIME_FRAME,
-        });
+        const rateLimiter = await RateLimiter.getInstance();
 
         fastify.addHook('onRequest', async (request, reply) => {
             const rateLimiterClientIdentifier = request.ip;

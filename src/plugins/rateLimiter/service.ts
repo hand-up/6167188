@@ -1,7 +1,10 @@
 import { TimeUnitEnum } from './constants';
 import { getSecondsELapsedTillNow } from '../../utils/time';
 import { configType } from './config';
-import { updateConfigCache } from './cache';
+import {
+    bootstrapRateLimiterConfigCache,
+    updateRateLimiterConfigCache,
+} from './cache';
 
 class Bucket {
     readonly #capacity: number;
@@ -76,22 +79,40 @@ export class RateLimiter {
         this.#config = { ...this.#config, ...config };
     }
 
-    static getInstance(config?: configType): RateLimiter {
+    static async getInstance(): Promise<RateLimiter> {
         if (!RateLimiter.#instance) {
+            const config = await bootstrapRateLimiterConfigCache();
             RateLimiter.#instance = new RateLimiter(config);
         }
 
         return RateLimiter.#instance;
     }
 
-    updateConfig(config: Partial<configType> = {}) {
-        updateConfigCache(config);
-        RateLimiter.#instance.#config = {
-            ...RateLimiter.#instance.#config,
-            ...config,
+    async updateConfig(newConfig: Partial<configType> = {}) {
+        // TODO: use a "clean config" as source of truth here to improve consistency
+
+        // Update cache
+        await updateRateLimiterConfigCache(newConfig);
+
+        // Update singleton instance
+        const { BLOCK_LIST, BUCKET_CAPACITY, TIME_FRAME } =
+            RateLimiter.#instance.#config;
+
+        const updatedConfig = {
+            BLOCK_LIST: newConfig.BLOCK_LIST || BLOCK_LIST,
+            BUCKET_CAPACITY: newConfig.BUCKET_CAPACITY || BUCKET_CAPACITY,
+            TIME_FRAME: newConfig.TIME_FRAME || TIME_FRAME,
         };
-        // Reset buckets
+
+        RateLimiter.#instance.#config = updatedConfig;
+        /**
+         * Clear current buckets
+         * This means that all active limits are reset at this point
+         * There would be several alternatives depending on what was needed this in probably the simplest :)
+         */
         this.#buckets = new Map();
+
+        return updatedConfig;
     }
 
     isClientUnderRateLimitRestrictions(clientIdentifier: string) {
