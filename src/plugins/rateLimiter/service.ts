@@ -71,12 +71,12 @@ export class RateLimiter {
         TIME_FRAME: 60,
     };
     #buckets: Record<string, any>;
-    readonly #blockList: Set<string>;
+    #blockList: Set<string>;
 
-    private constructor(config?: configType) {
+    private constructor(config: configType) {
         this.#buckets = new Map();
-        this.#blockList = new Set(config?.BLOCK_LIST.split(',') || []);
-        this.#config = { ...this.#config, ...config };
+        this.#blockList = new Set(config.BLOCK_LIST.split(',') || []);
+        this.#config = config;
     }
 
     static async getInstance(): Promise<RateLimiter> {
@@ -105,21 +105,27 @@ export class RateLimiter {
         };
 
         RateLimiter.#instance.#config = updatedConfig;
+        if (newConfig.BLOCK_LIST) {
+            RateLimiter.#instance.#blockList = new Set(
+                newConfig.BLOCK_LIST?.split(',')
+            );
+        }
         /**
          * Clear current buckets
          * This means that all active limits are reset at this point
          * There would be several alternatives depending on what was needed this in probably the simplest :)
          */
+        // TODO: Caution this only works per machine
         this.#buckets = new Map();
 
         return updatedConfig;
     }
 
-    isClientUnderRateLimitRestrictions(clientIdentifier: string) {
-        return !this.#blockList.has(clientIdentifier);
+    #isClientUnderRateLimitRestrictions(clientIdentifier: string) {
+        return this.#blockList.has(clientIdentifier);
     }
 
-    createOrUpdateClientBucket(clientIdentifier: string) {
+    #createOrUpdateClientBucket(clientIdentifier: string) {
         if (!this.#buckets.has(clientIdentifier)) {
             const { BUCKET_CAPACITY, TIME_FRAME } = this.#config;
 
@@ -130,5 +136,22 @@ export class RateLimiter {
         }
 
         return this.#buckets.get(clientIdentifier);
+    }
+
+    isClientLimitExceeded(clientIdentifier: string) {
+        if (!this.#isClientUnderRateLimitRestrictions(clientIdentifier)) {
+            return {
+                isLimitExceeded: false,
+            };
+        }
+
+        const clientBucket = this.#createOrUpdateClientBucket(clientIdentifier);
+
+        const { isLimitExceeded, retryAfter } = clientBucket.take();
+
+        return {
+            isLimitExceeded,
+            retryAfter,
+        };
     }
 }

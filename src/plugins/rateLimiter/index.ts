@@ -11,25 +11,20 @@ export const rateLimiterService = fp(
     ): Promise<void> => {
         const rateLimiter = await RateLimiter.getInstance();
 
+        // If we needed a per request custom logic
+        // fastify.decorate(
+        //     'isClientLimitExceeded',
+        //     rateLimiter.isClientLimitExceeded
+        // );
+
         fastify.addHook('onRequest', async (request, reply) => {
-            const rateLimiterClientIdentifier = request.ip;
-
-            if (
-                rateLimiter.isClientUnderRateLimitRestrictions(
-                    rateLimiterClientIdentifier
-                )
-            ) {
-                next();
-            }
-
-            const bucket = rateLimiter.createOrUpdateClientBucket(
-                rateLimiterClientIdentifier
-            );
-            const { isLimitExceeded, retryAfter } = bucket.take();
+            const clientIdentifier = request.ip;
+            const { isLimitExceeded, retryAfter } =
+                rateLimiter.isClientLimitExceeded(clientIdentifier);
 
             if (isLimitExceeded) {
                 request.log.warn(
-                    `Client ${rateLimiterClientIdentifier} exceeded rate limit`
+                    `Client ${clientIdentifier} exceeded rate limit`
                 );
                 reply.status(429);
                 reply.header('Retry-After', retryAfter);
@@ -40,3 +35,12 @@ export const rateLimiterService = fp(
         next();
     }
 );
+
+// declare module 'fastify' {
+//     export interface FastifyInstance {
+//         isClientLimitExceeded(clientIdentifier: string): {
+//             isLimitExceeded: boolean;
+//             retryAfter?: number;
+//         };
+//     }
+// }
