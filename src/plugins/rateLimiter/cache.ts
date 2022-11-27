@@ -1,7 +1,10 @@
-const Redis = require('ioredis'); // TODO: Fix this
+import Redis from 'ioredis';
+const RedisMock = require('ioredis-mock'); // TODO: Fix this
+
 import { configType, RateLimiterEnumConfig } from './config';
 
-const redis = new Redis();
+const redis =
+    process.env.npm_lifecycle_event === 'test' ? new RedisMock() : new Redis();
 
 /**
  * @description - Bootstrap rate limiter config cache, caches ENV defaults if no cached values exist
@@ -30,19 +33,18 @@ export async function bootstrapRateLimiterConfigCache(): Promise<configType> {
     }
 
     if (!cachedTimeFrame) {
-        // TODO: Think if it's really needed to wait this 3
-        await redis.set(TIME_FRAME, process.env.TIME_FRAME);
+        redis.set(TIME_FRAME, process.env.TIME_FRAME);
     }
 
     return {
-        BLOCK_LIST: cachedBlockList || BLOCK_LIST,
-        BUCKET_CAPACITY: cachedBucketCapacity || BUCKET_CAPACITY,
-        TIME_FRAME: cachedTimeFrame || TIME_FRAME,
+        BLOCK_LIST: cachedBlockList || process.env.BLOCK_LIST,
+        BUCKET_CAPACITY: cachedBucketCapacity || process.env.BUCKET_CAPACITY,
+        TIME_FRAME: cachedTimeFrame || process.env.TIME_FRAME,
     };
 }
 
 export async function updateRateLimiterConfigCache(
-    newConfig: Partial<configType> = {}
+    newConfig: Partial<configType>
 ) {
     const { BLOCK_LIST, BUCKET_CAPACITY, TIME_FRAME } = RateLimiterEnumConfig;
 

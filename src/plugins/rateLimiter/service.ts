@@ -75,7 +75,7 @@ export class RateLimiter {
 
     private constructor(config: configType) {
         this.#buckets = new Map();
-        this.#blockList = new Set(config.BLOCK_LIST.split(',') || []);
+        this.#blockList = new Set(config.BLOCK_LIST.split(','));
         this.#config = config;
     }
 
@@ -88,9 +88,8 @@ export class RateLimiter {
         return RateLimiter.#instance;
     }
 
-    async updateConfig(newConfig: Partial<configType> = {}) {
+    async updateConfig(newConfig: Partial<configType>) {
         // TODO: use a "clean config" as source of truth here to improve consistency
-
         // Update cache
         await updateRateLimiterConfigCache(newConfig);
 
@@ -107,7 +106,7 @@ export class RateLimiter {
         RateLimiter.#instance.#config = updatedConfig;
         if (newConfig.BLOCK_LIST) {
             RateLimiter.#instance.#blockList = new Set(
-                newConfig.BLOCK_LIST?.split(',')
+                newConfig.BLOCK_LIST.split(',')
             );
         }
         /**

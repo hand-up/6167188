@@ -30,6 +30,10 @@ const rateLimiterController: FastifyPluginAsync = async (
     fastify,
     opts
 ): Promise<void> => {
+    fastify.get('/', async function (request, reply) {
+        return 'Rate Limiter is alive! Yeaahh';
+    });
+
     fastify.patch(
         '/',
         { schema: rateLimiterPatchSchema },
@@ -48,15 +52,19 @@ const rateLimiterController: FastifyPluginAsync = async (
 
             const rateLimiter = await RateLimiter.getInstance();
             const updatedConfig = await rateLimiter.updateConfig({
-                BLOCK_LIST: blockList ? blockList.join(',') : undefined,
+                BLOCK_LIST: blockList
+                    ? blockList.map((e) => e.trim()).join(',')
+                    : undefined,
                 BUCKET_CAPACITY: bucketCapacity,
                 TIME_FRAME: timeFrame,
             });
 
-            return {
+            reply.send({
                 message: `Rate limiter config update successfully!`,
                 activeConfig: updatedConfig,
-            };
+            });
+
+            return reply;
         }
     );
 };
