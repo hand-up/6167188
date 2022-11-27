@@ -16,6 +16,7 @@ export const rateLimiterService = fp(
         //     'isClientLimitExceeded',
         //     rateLimiter.isClientLimitExceeded
         // );
+        // await fastify.ready()
 
         fastify.addHook('onRequest', async (request, reply) => {
             const clientIdentifier = request.ip;

@@ -240,7 +240,7 @@ test('Context - 6 requests each 60 seconds limit per client', (t) => {
         t.equal(req6.status, 200);
         t.equal(reqExceedingLimit.status, 429);
 
-        clock.tick(11000); // 11s
+        clock.tick(12000); // 11s
         const [req1after10s, req2after10s] = await Promise.all([
             makeRequest(),
             makeRequest(),
