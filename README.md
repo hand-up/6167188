@@ -12,6 +12,8 @@ Please go through the different sections before you start or come back to these 
 - Proposed Solution
 - Tests
 
+![CleanShot 2022-11-27 at 23 05 50](https://user-images.githubusercontent.com/9373787/204164707-e21f3e5a-269b-4896-aaba-39acbba2e9d2.gif)
+
 ## How to run
 
 ### Docker Run
