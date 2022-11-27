@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  rate_limiter:
+    container_name: fastify_rate_limiter
+    image: luisoliveira/fastify_rate_limiter:0.0.1
+    build:
+      context: .
+    ports:
+      - '3003:3003'
+    env_file: .env
+    environment:
+      - REDIS_CONNECTION=redis://redis:6379
+    depends_on:
+      - redis
+
+  redis:
+    container_name: redis
+    hostname: redis
+    image: 'redis:7.0.5'
+    ports:
+      - '6379:6379'
+    restart: always
+    env_file: .env
+    volumes:
+      - fastify_volume:/var/lib/redis/data
+
+volumes:
+  fastify_volume: {}

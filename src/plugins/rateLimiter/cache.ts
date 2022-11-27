@@ -4,7 +4,9 @@ const RedisMock = require('ioredis-mock'); // TODO: Fix this
 import { configType, RateLimiterEnumConfig } from './config';
 
 const redis =
-    process.env.npm_lifecycle_event === 'test' ? new RedisMock() : new Redis();
+    process.env.npm_lifecycle_event === 'test'
+        ? new RedisMock()
+        : new Redis(process.env.REDIS_CONNECTION || '127.0.0.1:6379');
 
 // // ℹ️ INFO: About the ENV usage we should validate the env itself on startup
 

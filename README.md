@@ -14,6 +14,27 @@ Please go through the different sections before you start or come back to these 
 
 ## How to run
 
+### Docker Run
+
+Inside project folder run
+```bash
+docker-compose up
+```
+**After the container starts copy the client IP and add it to the blocklist**
+
+![img_1.png](img_1.png)
+
+ex: switch `172.29.0.1` for your container ip
+```bash
+curl --location --request PATCH 'localhost:3003/rateLimiter' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "blockList": ["127.0.0.1", "::1", "172.29.0.1"]
+}'
+```
+
+### Run In Your Machine
+
 ### Requirements
 [x] - Node latest lts
 [x] - Redis server running with the default configuration
@@ -61,8 +82,8 @@ There are some known issues that would require more attention and time
 
 There is a lot that we could do but for the purpose of the challenge and my approach these are the most important missing features (that I might still do)
 
-- [ ] Dockerized application
-- [ ] Web client with monitor dashboard and interface to change config 
+[x] - ~~Dockerized application~~
+[ ] - Web client with monitor dashboard and interface to change config 
 
 ## Challenge
 
