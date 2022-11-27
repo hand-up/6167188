@@ -27,11 +27,10 @@ type patchBodyType = {
 };
 
 const rateLimiterController: FastifyPluginAsync = async (
-    fastify,
-    opts
+    fastify
 ): Promise<void> => {
-    fastify.get('/', async function (request, reply) {
-        return 'Rate Limiter is alive! Yeaahh';
+    fastify.get('/', async function () {
+        return 'Rate Limiter is alive!';
     });
 
     fastify.patch(

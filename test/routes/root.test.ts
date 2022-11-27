@@ -8,7 +8,7 @@ const clock = FakeTimers.install();
  * Advance the clock each test 10m to allow to have more requests available
  */
 beforeEach(() => {
-    clock.tick(600000); // 10m
+    clock.tick(1200000); // 20m
 });
 
 const rateLimitExceededErrorBody10s = JSON.stringify({

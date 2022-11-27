@@ -1,4 +1,3 @@
-import { TimeUnitEnum } from './constants';
 import { getSecondsELapsedTillNow } from '../../utils/time';
 import { configType } from './config';
 import {
@@ -16,13 +15,8 @@ class Bucket {
      * @rateLimiter requester [IP] will be able to do 5 [limit] requests per 1 [timeframe ]second [timeUnit]
      * @param limit - request number limit
      * @param timeFrame - timeframe duration where the limit is active
-     * @param timeUnit - time unit applied to the timeframe duration
      */
-    constructor(
-        limit: number,
-        timeFrame: number,
-        timeUnit: TimeUnitEnum = TimeUnitEnum.second
-    ) {
+    constructor(limit: number, timeFrame: number) {
         this.#capacity = limit;
         this.#lastFilled = Date.now();
         this.#fillPerSecond = limit / timeFrame;
