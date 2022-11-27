@@ -83,12 +83,12 @@ The main thing for the challenge would be to choose the rate limiter main algori
 A redis cache is used to maintain the Rate Limiter config, this means that the config is shared in clusters if needed but the client buckets part is not, is by machine.
 From a 10000 feet view the plugin works as follows:
 
-1 - Plugin is registered in the scope pretended (here by scope I mean all routes, a set of routes or individual route)
-2 - Plugin bootstraps with a config set by the following order Hardcoded -> ENV -> Cache
-3 - Each request is intercepted on the hook on the plugin
-4 - By IP the service check's if the IP is on the blockList, the ip was chosen but inside the service there are no direct references to ip, so any identifier available could be used, ex: some client or tenant id
-5 - If the IP is on the blocklist a bucket is created using the active configuration
-6 - The way the bucket works in a nutshell is, the bucket is created with a max quantity of tokens, each time a client makes a request a token is consumed if no more tokens exist for the user then the request is denied. The bucket fills continuously at a specific rate, ex: 1 token per minute the max quantity of tokens the user can consume applies to a time frame, ex: 60m, after this time frame is over it starts again.
+1. Plugin is registered in the scope pretended (here by scope I mean all routes, a set of routes or individual route)
+2. Plugin bootstraps with a config set by the following order Hardcoded -> ENV -> Cache
+3. Each request is intercepted on the hook on the plugin
+4. By IP the service check's if the IP is on the blockList, the ip was chosen but inside the service there are no direct references to ip, so any identifier available could be used, ex: some client or tenant id
+5. If the IP is on the blocklist a bucket is created using the active configuration
+6. The way the bucket works in a nutshell is, the bucket is created with a max quantity of tokens, each time a client makes a request a token is consumed if no more tokens exist for the user then the request is denied. The bucket fills continuously at a specific rate, ex: 1 token per minute the max quantity of tokens the user can consume applies to a time frame, ex: 60m, after this time frame is over it starts again.
 
 ## Tests
 
