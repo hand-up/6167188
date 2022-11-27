@@ -38,8 +38,8 @@ curl --location --request PATCH 'localhost:3003/rateLimiter' \
 ### Run In Your Machine
 
 ### Requirements
-[x] - Node latest lts
-[x] - Redis server running with the default configuration
+- [x] Node latest lts
+- [x] Redis server running with the default configuration
 
 ### Available Scripts
 
@@ -84,8 +84,8 @@ There are some known issues that would require more attention and time
 
 There is a lot that we could do but for the purpose of the challenge and my approach these are the most important missing features (that I might still do)
 
-[x] - ~~Dockerized application~~
-[ ] - Web client with monitor dashboard and interface to change config 
+- [x] ~~Dockerized application~~
+- [ ] - Web client with monitor dashboard and interface to change config 
 
 ## Challenge
 
