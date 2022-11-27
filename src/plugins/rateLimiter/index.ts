@@ -11,7 +11,7 @@ export const rateLimiterService = fp(
     ): Promise<void> => {
         const rateLimiter = await RateLimiter.getInstance();
 
-        // If we needed a per request custom logic
+        // ℹ️ INFO: If we needed a per request custom logic
         // fastify.decorate(
         //     'isClientLimitExceeded',
         //     rateLimiter.isClientLimitExceeded
@@ -37,6 +37,7 @@ export const rateLimiterService = fp(
     }
 );
 
+// ℹ️ INFO: If we needed a per request custom logic
 // declare module 'fastify' {
 //     export interface FastifyInstance {
 //         isClientLimitExceeded(clientIdentifier: string): {

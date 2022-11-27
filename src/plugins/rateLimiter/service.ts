@@ -1,9 +1,9 @@
-import { getSecondsELapsedTillNow } from '../../utils/time';
 import { configType } from './config';
 import {
     bootstrapRateLimiterConfigCache,
     updateRateLimiterConfigCache,
 } from './cache';
+import { getSecondsELapsedTillNow } from '../../utils/time';
 
 class Bucket {
     readonly #capacity: number;
@@ -12,7 +12,7 @@ class Bucket {
     #lastFilled: number;
 
     /**
-     * @rateLimiter requester [IP] will be able to do 5 [limit] requests per 1 [timeframe ]second [timeUnit]
+     * @rateLimiter requester [IP] will be able to do 6 [limit] requests per 60 seconds [timeframe]second
      * @param limit - request number limit
      * @param timeFrame - timeframe duration where the limit is active
      */
@@ -60,7 +60,7 @@ class Bucket {
 export class RateLimiter {
     static #instance: RateLimiter;
     #config: configType = {
-        BLOCK_LIST: '',
+        BLOCK_LIST: '127.0.0.1, ::1',
         BUCKET_CAPACITY: 6,
         TIME_FRAME: 60,
     };
@@ -109,6 +109,7 @@ export class RateLimiter {
          * There would be several alternatives depending on what was needed this in probably the simplest :)
          */
         // TODO: Caution this only works per machine
+        // ℹ️ INFO: If we needed per cluster we need to push the buckets to redis cache
         this.#buckets = new Map();
 
         return updatedConfig;

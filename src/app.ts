@@ -14,6 +14,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
 ): Promise<void> => {
     // Place here your custom code!
 
+    // ℹ️ INFO: This applies the rate limit to all routes
     fastify.register(rateLimiterService);
     // Do not touch the following lines
 

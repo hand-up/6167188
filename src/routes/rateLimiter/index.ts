@@ -40,6 +40,7 @@ const rateLimiterController: FastifyPluginAsync = async (
             const { blockList, bucketCapacity, timeFrame } =
                 request.body as patchBodyType;
 
+            // TODO: There is a lot to do here :)
             // TODO: Improve schema, proper validation and typings
             if (!blockList && !bucketCapacity && !timeFrame) {
                 reply.status(400);

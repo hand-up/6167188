@@ -6,6 +6,8 @@ import { configType, RateLimiterEnumConfig } from './config';
 const redis =
     process.env.npm_lifecycle_event === 'test' ? new RedisMock() : new Redis();
 
+// // ℹ️ INFO: About the ENV usage we should validate the env itself on startup
+
 /**
  * @description - Bootstrap rate limiter config cache, caches ENV defaults if no cached values exist
  * @return - The Redis client instance
